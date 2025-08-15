@@ -42,19 +42,25 @@ io.on("connection", (socket) => {
   });
 });
 
-// API route to generate LiveKit token
-app.get("/get-token", (req, res) => {
+app.get("/get-token", async (req, res) => {
   const { roomName, username } = req.query;
 
+  // Create token
   const at = new AccessToken(
     process.env.LIVEKIT_API_KEY,
     process.env.LIVEKIT_API_SECRET,
     { identity: username }
   );
 
+  // Add permissions
   at.addGrant({ roomJoin: true, room: roomName });
 
-  res.json({ token: at.toJwt() });
+  // Wait for the token string
+  const token = await at.toJwt();
+
+  console.log("Generated token:", token);
+
+  res.json({ token });
 });
 
 app.get("/", (req, res) => {
