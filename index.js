@@ -13,7 +13,7 @@ const io = new Server(httpServer, {
   cors: { origin: "*" },
 });
 
-const userSockets = {}; // { username: socketId }
+const userSockets = {}; // { username: socketId '}
 
 io.on("connection", (socket) => {
   console.log("User connected:", socket.id);
