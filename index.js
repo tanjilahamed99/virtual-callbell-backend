@@ -8,7 +8,6 @@ require("dotenv").config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: "*" },
@@ -42,20 +41,32 @@ io.on("connection", (socket) => {
   });
 });
 
-// API route to generate LiveKit token
-app.get("/get-token", (req, res) => {
+app.get("/get-token", async (req, res) => {
   const { roomName, username } = req.query;
 
+  // Create token
   const at = new AccessToken(
     process.env.LIVEKIT_API_KEY,
     process.env.LIVEKIT_API_SECRET,
     { identity: username }
   );
 
+  // Add permissions
   at.addGrant({ roomJoin: true, room: roomName });
 
-  res.json({ token: at.toJwt() });
+  // Wait for the token string
+  const token = await at.toJwt();
+
+  res.json({ token });
 });
+
+
+const userRoutes = require("./src/routes/auth/index.js");
+
+app.use("/v1/api/user", userRoutes);
+
+
+
 
 app.get("/", (req, res) => {
   res.send("Welcome to the virtual callbell Call Backend");
