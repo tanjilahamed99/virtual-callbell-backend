@@ -8,7 +8,6 @@ require("dotenv").config();
 const app = express();
 app.use(cors());
 app.use(express.json());
-
 const httpServer = createServer(app);
 const io = new Server(httpServer, {
   cors: { origin: "*" },
@@ -58,10 +57,16 @@ app.get("/get-token", async (req, res) => {
   // Wait for the token string
   const token = await at.toJwt();
 
-  console.log("Generated token:", token);
-
   res.json({ token });
 });
+
+
+const userRoutes = require("./src/routes/auth/index.js");
+
+app.use("/v1/api/user", userRoutes);
+
+
+
 
 app.get("/", (req, res) => {
   res.send("Welcome to the virtual callbell Call Backend");
