@@ -11,7 +11,7 @@ const register = async (req, res, next) => {
   }
 
   try {
-    // Check for existing email with the same role
+    // Check for existing email with the same rol
 
     const existingUser = await User.findOne({ email });
 
