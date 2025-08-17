@@ -23,7 +23,6 @@ io.on("connection", (socket) => {
   // Registered user joins
   socket.on("register", (userId) => {
     userSockets.push({ id: userId, socketId: socket.id });
-    console.log(userSockets);
     io.emit(
       "users",
       userSockets.map(({ socketId, ...rest }) => rest)
@@ -32,7 +31,6 @@ io.on("connection", (socket) => {
 
   // Guest calls directly
   socket.on("guest-call", ({ from, to, roomName }) => {
-    console.log(userSockets);
     const target = userSockets.find((entry) => entry.id === "68a079f6bbe84b8f120dff89");
     console.log(target)
     if (target) {
