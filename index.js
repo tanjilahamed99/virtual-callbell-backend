@@ -9,6 +9,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 const httpServer = createServer(app);
+const port = process.env.PORT || 5000;
+
+
 const io = new Server(httpServer, {
   cors: { origin: "*" },
 });
@@ -60,18 +63,22 @@ app.get("/get-token", async (req, res) => {
   res.json({ token });
 });
 
-
 const userRoutes = require("./src/routes/auth/index.js");
+const connectDB = require("./src/db/connectDB.js");
 
-app.use("/v1/api/user", userRoutes);
-
-
-
+app.use("/v1/api/auth", userRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome to the virtual callbell Call Backend");
 });
 
-httpServer.listen(5000, () => {
-  console.log("Backend running on http://localhost:5000");
-});
+const main = async () => {
+  console.log("Called");
+  await connectDB();
+
+  httpServer.listen(port, () => {
+    console.log("listening to port ", port);
+  });
+};
+
+main();
