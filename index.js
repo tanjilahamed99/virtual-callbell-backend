@@ -18,29 +18,36 @@ const io = new Server(httpServer, {
 const userSockets = []; // Move outside, so it's shared across all connections
 
 io.on("connection", (socket) => {
-  console.log("Connected:", socket.id);
+  // console.log("Connected:", socket.id);
 
   // Registered user joins
   socket.on("register", (userId) => {
     userSockets.push({ id: userId, socketId: socket.id });
-    console.log(userSockets);
     io.emit(
       "users",
       userSockets.map(({ socketId, ...rest }) => rest)
     );
   });
 
-  // Guest calls directly
+  // Guest calls registered user
   socket.on("guest-call", ({ from, to, roomName }) => {
-    console.log(userSockets);
-    const target = userSockets.find((entry) => entry.id === "68a079f6bbe84b8f120dff89");
-    console.log(target)
+    console.log(to , "to")
+    const target = userSockets.find((entry) => entry.id === "68a1cfbe0210de1313533675"); // <-- use `to` not hardcoded
+    console.log("📞 Guest calling user:", to, "Found:", target);
+
     if (target) {
+      // Notify registered user about incoming call
       io.to(target.socketId).emit("incoming-call", {
-        from: { name: from, guest: true },
+        from: { name: from, guest: true, socketId: socket.id }, // include guest socketId
         roomName,
       });
     }
+  });
+
+  // Registered user accepts the call
+  socket.on("call-accepted", ({ roomName, guestSocketId }) => {
+    console.log("✅ Call accepted, notifying guest:", guestSocketId);
+    io.to(guestSocketId).emit("call-accepted", { roomName });
   });
 
   // Handle disconnect
