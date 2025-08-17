@@ -11,36 +11,49 @@ app.use(express.json());
 const httpServer = createServer(app);
 const port = process.env.PORT || 5000;
 
-
 const io = new Server(httpServer, {
   cors: { origin: "*" },
 });
 
-const userSockets = {}; // { username: socketId '}
+const userSockets = []; // Move outside, so it's shared across all connections
 
 io.on("connection", (socket) => {
-  console.log("User connected:", socket.id);
+  console.log("Connected:", socket.id);
 
-  socket.on("register", (username) => {
-    userSockets[username] = socket.id;
-    io.emit("users", Object.keys(userSockets)); // send list to all
+  // Registered user joins
+  socket.on("register", (userId) => {
+    userSockets.push({ id: userId, socketId: socket.id });
+    console.log(userSockets);
+    io.emit(
+      "users",
+      userSockets.map(({ socketId, ...rest }) => rest)
+    );
   });
 
-  socket.on("call-user", ({ from, to, roomName }) => {
-    const targetSocket = userSockets[to];
-    if (targetSocket) {
-      io.to(targetSocket).emit("incoming-call", { from, roomName });
+  // Guest calls directly
+  socket.on("guest-call", ({ from, to, roomName }) => {
+    console.log(userSockets);
+    const target = userSockets.find((entry) => entry.id === "68a079f6bbe84b8f120dff89");
+    console.log(target)
+    if (target) {
+      io.to(target.socketId).emit("incoming-call", {
+        from: { name: from, guest: true },
+        roomName,
+      });
     }
   });
 
+  // Handle disconnect
   socket.on("disconnect", () => {
-    for (const [name, id] of Object.entries(userSockets)) {
-      if (id === socket.id) {
-        delete userSockets[name];
-        break;
-      }
-    }
-    io.emit("users", Object.keys(userSockets));
+    const index = userSockets.findIndex(
+      (entry) => entry.socketId === socket.id
+    );
+    if (index !== -1) userSockets.splice(index, 1);
+
+    io.emit(
+      "users",
+      userSockets.map(({ socketId, ...rest }) => rest)
+    );
   });
 });
 
