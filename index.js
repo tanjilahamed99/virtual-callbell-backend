@@ -1,7 +1,6 @@
 const { createServer } = require("http");
 const { Server } = require("socket.io");
 const cors = require("cors");
-const { AccessToken } = require("livekit-server-sdk");
 const express = require("express");
 require("dotenv").config();
 
@@ -10,19 +9,23 @@ app.use(cors());
 app.use(express.json());
 const httpServer = createServer(app);
 const port = process.env.PORT || 5000;
+const connectDB = require("./src/db/connectDB.js");
 
 const io = new Server(httpServer, {
   cors: { origin: "*" },
 });
 
-const userSockets = []; // Move outside, so it's shared across all connections
+let userSockets = []; // Move outside, so it's shared across all connections
 
 io.on("connection", (socket) => {
-  // console.log("Connected:", socket.id);
+  console.log("Connected:", socket.id);
 
-  // Registered user joins
   socket.on("register", (userId) => {
+    // Remove any previous socket entry for this user
+    userSockets = userSockets.filter((user) => user.id !== userId);
+    // Add new socket
     userSockets.push({ id: userId, socketId: socket.id });
+    // Broadcast updated users (without socketId exposed)
     io.emit(
       "users",
       userSockets.map(({ socketId, ...rest }) => rest)
@@ -31,9 +34,7 @@ io.on("connection", (socket) => {
 
   // Guest calls registered user
   socket.on("guest-call", ({ from, to, roomName }) => {
-    console.log(to , "to")
-    const target = userSockets.find((entry) => entry.id === "68a1cfbe0210de1313533675"); // <-- use `to` not hardcoded
-    console.log("📞 Guest calling user:", to, "Found:", target);
+    const target = userSockets.find((entry) => entry.id === to);
 
     if (target) {
       // Notify registered user about incoming call
@@ -46,8 +47,25 @@ io.on("connection", (socket) => {
 
   // Registered user accepts the call
   socket.on("call-accepted", ({ roomName, guestSocketId }) => {
-    console.log("✅ Call accepted, notifying guest:", guestSocketId);
-    io.to(guestSocketId).emit("call-accepted", { roomName });
+    io.to(guestSocketId).emit("call-accepted", {
+      roomName,
+      peerSocketId: socket.id,
+    });
+  });
+
+  // Registered user declines call
+  socket.on("call-declined", ({ guestSocketId }) => {
+    // Send decline event back to the guest
+    io.to(guestSocketId).emit("call-declined");
+  });
+
+  // When a user ends the call
+  socket.on("end-call", ({ targetSocketId }) => {
+    // Notify the other peer
+    io.to(targetSocketId).emit("end-call");
+
+    // Also notify the sender (so both clean up at once)
+    io.to(socket.id).emit("end-call");
   });
 
   // Handle disconnect
@@ -64,29 +82,11 @@ io.on("connection", (socket) => {
   });
 });
 
-app.get("/get-token", async (req, res) => {
-  const { roomName, username } = req.query;
-
-  // Create token
-  const at = new AccessToken(
-    process.env.LIVEKIT_API_KEY,
-    process.env.LIVEKIT_API_SECRET,
-    { identity: username }
-  );
-
-  // Add permissions
-  at.addGrant({ roomJoin: true, room: roomName });
-
-  // Wait for the token string
-  const token = await at.toJwt();
-
-  res.json({ token });
-});
-
 const userRoutes = require("./src/routes/auth/index.js");
-const connectDB = require("./src/db/connectDB.js");
+const liveKit = require("./src/routes/liveKit/index.js");
 
 app.use("/v1/api/auth", userRoutes);
+app.use("/v1/api/liveKit", liveKit);
 
 app.get("/", (req, res) => {
   res.send("Welcome to the virtual callbell Call Backend");
