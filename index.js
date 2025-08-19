@@ -18,8 +18,6 @@ const io = new Server(httpServer, {
 let userSockets = []; // Move outside, so it's shared across all connections
 
 io.on("connection", (socket) => {
-  console.log("Connected:", socket.id);
-
   socket.on("register", (userId) => {
     // Remove any previous socket entry for this user
     userSockets = userSockets.filter((user) => user.id !== userId);
@@ -68,6 +66,17 @@ io.on("connection", (socket) => {
     io.to(socket.id).emit("end-call");
   });
 
+  // When the caller cancels the call
+  socket.on("callCanceled", ({ userId }) => {
+    const target = userSockets.find((entry) => entry.id === userId);
+    if (target) {
+      io.to(target.socketId).emit("callCanceled", {
+        from: socket.id,
+        success: true,
+      });
+    }
+  });
+
   // Handle disconnect
   socket.on("disconnect", () => {
     const index = userSockets.findIndex(
@@ -82,11 +91,9 @@ io.on("connection", (socket) => {
   });
 });
 
-
-
 const userRoutes = require("./src/routes/auth/index.js");
 const liveKit = require("./src/routes/liveKit/index.js");
-const users = require("./src/routes/users/index.js")
+const users = require("./src/routes/users/index.js");
 
 app.use("/v1/api/auth", userRoutes);
 app.use("/v1/api/liveKit", liveKit);
