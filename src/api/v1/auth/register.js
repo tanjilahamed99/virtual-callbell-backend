@@ -3,8 +3,6 @@ const User = require("../../../models/User");
 const register = async (req, res, next) => {
   const { name, email, password } = req.body || {};
 
-  console.log(req.body);
-
   // Basic validation
   if (!name || !email || !password) {
     return res
@@ -14,12 +12,12 @@ const register = async (req, res, next) => {
 
   try {
     // Check for existing email with the same rol
-
     const existingUser = await User.findOne({ email });
+    console.log(existingUser)
 
     if (existingUser) {
       return res.status(201).send({
-        success: true,
+        success: false,
         message: `user of  ${name} already registered!`,
       });
     }
