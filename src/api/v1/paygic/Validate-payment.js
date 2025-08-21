@@ -1,12 +1,11 @@
 const axios = require("axios");
 const User = require("../../../models/User");
+const Website = require("../../../models/WebsiteInfo");
 
 const validatePayment = async (req, res, next) => {
   try {
-    const {
-      merchantReferenceId,
-      userId,
-    } = req.body;
+    const { merchantReferenceId, userId, subId } = req.body;
+    const planData = await Website.findOne();
     const keys = {
       mid: "TARASONS",
       password: "6Qij^91KoLxt",
@@ -73,7 +72,33 @@ const validatePayment = async (req, res, next) => {
       }
     );
 
-    console.log(paymentStatus);
+    // Plan details (e.g. duration in days)
+    // const planDurationDays = planData.plan.duration || 10; // e.g. 30
+    const planDurationDays = 10; // e.g. 30
+    const now = new Date();
+    let startDate = now;
+    let endDate = new Date();
+
+    if (findUser.subscription && findUser.subscription.endDate > now) {
+      // User still has active subscription → extend from existing endDate
+      startDate = findUser.subscription.startDate;
+
+      // add planDuration to old endDate
+      endDate = new Date(findUser.subscription.endDate);
+      endDate.setDate(endDate.getDate() + planDurationDays);
+    } else {
+      // No active plan or expired → start from now
+      startDate = now;
+      endDate.setDate(now.getDate() + planDurationDays);
+    }
+
+    // Build subscription object
+    let subscription = {
+      plan: "Free",
+      status: "active",
+      startDate,
+      endDate,
+    };
 
     let updateHistory = [];
 
@@ -95,6 +120,9 @@ const validatePayment = async (req, res, next) => {
             email: findUser.email,
             id: findUser.id,
           },
+          planId: subId,
+          plan: planData.plan.name,
+          planDuration: planData.plan.duration,
         },
       ];
     } else {
@@ -109,12 +137,16 @@ const validatePayment = async (req, res, next) => {
             email: findUser.email,
             id: findUser.id,
           },
+          planId: subId,
+          plan: planData.plan.name,
+          planDuration: planData.plan.duration,
         },
       ];
     }
     const update = {
       $set: {
         transactionHistory: updateHistory,
+        subscription,
       },
     };
 

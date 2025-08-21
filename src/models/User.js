@@ -51,8 +51,17 @@ const userSchema = new mongoose.Schema({
         email: String,
         id: String,
       },
+      planId: { type: String },
+      plan: { type: String, default: "free" },
+      planDuration: { type: Number, default: 0 },
     },
   ],
+  subscription: {
+    plan: { type: String, default: "free" },
+    status: { type: String, default: "active" },
+    startDate: { type: Date, default: Date.now },
+    endDate: { type: Date },
+  },
 });
 
 userSchema.pre("save", async function (next) {
