@@ -25,6 +25,8 @@ const getMyData = async (req, res, next) => {
         phone: result.phone,
         address: result.address,
         id: result.id,
+        transactionHistory: result.transactionHistory,
+        subscription: result.subscription,
       },
     });
   } catch (error) {

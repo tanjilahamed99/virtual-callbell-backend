@@ -37,6 +37,31 @@ const userSchema = new mongoose.Schema({
     type: String,
     default: "",
   },
+  transactionHistory: [
+    {
+      amount: { type: Number },
+      paymentMethod: { type: String },
+      transactionId: { type: String },
+      status: { type: String, default: "Pending" },
+      createdAt: { type: Date, default: Date.now }, // Optional: add timestamp
+      razorpay: { type: Object, default: {} },
+      paygic: { type: Object, default: {} },
+      author: {
+        name: String,
+        email: String,
+        id: String,
+      },
+      planId: { type: String },
+      plan: { type: String, default: "free" },
+      planDuration: { type: Number, default: 0 },
+    },
+  ],
+  subscription: {
+    plan: { type: String, default: "free" },
+    status: { type: String, default: "active" },
+    startDate: { type: Date, default: Date.now },
+    endDate: { type: Date },
+  },
 });
 
 userSchema.pre("save", async function (next) {
