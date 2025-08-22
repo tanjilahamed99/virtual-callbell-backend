@@ -1,17 +1,17 @@
-const Website = require("../../../models/WebsiteInfo");
+const Paygic = require("../../../models/Paygic");
 
-const addWebsiteData = async (req, res, next) => {
+const setPaygic = async (req, res, next) => {
   try {
     const updatedData = req.body;
-
-    let settings = await Website.findOne();
+    let settings = await Paygic.findOne();
     if (!settings) {
       // If no document exists yet, create it
-      settings = new Website(updatedData);
+      settings = new Paygic(updatedData);
     } else {
       // Update existing document
       Object.assign(settings, updatedData);
     }
+
     await settings.save();
     res.json({
       success: true,
@@ -20,8 +20,10 @@ const addWebsiteData = async (req, res, next) => {
     });
   } catch (error) {
     console.error(error);
-    next(error);
+    res
+      .status(500)
+      .json({ message: "Error updating website settings", success: false });
   }
 };
 
-module.exports = addWebsiteData;
+module.exports = setPaygic;

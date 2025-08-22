@@ -1,3 +1,4 @@
+const createContact = require("../../api/v1/users/createContact");
 const getMyData = require("../../api/v1/users/getMyData");
 const getUserData = require("../../api/v1/users/getUser");
 const getWebsiteData = require("../../api/v1/users/getWebsiteData");
@@ -9,5 +10,6 @@ router.put("/update/:userId", updateUserData);
 router.get("/myData/:userId", getMyData);
 router.get("/get/:userId", getUserData);
 router.get("/website", getWebsiteData);
+router.post('/contact', createContact)
 
 module.exports = router;
