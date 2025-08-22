@@ -95,11 +95,13 @@ const userRoutes = require("./src/routes/auth/index.js");
 const liveKit = require("./src/routes/liveKit/index.js");
 const users = require("./src/routes/users/index.js");
 const paygic = require("./src/routes/paygic/index.js");
+const admin = require('./src/routes/admin/index.js');
 
 app.use("/v1/api/auth", userRoutes);
 app.use("/v1/api/liveKit", liveKit);
 app.use("/v1/api/users", users);
 app.use("/v1/api/paygic", paygic);
+app.use("/v1/api/admin", admin);
 
 app.get("/", (req, res) => {
   res.send("Welcome to the virtual callbell Call Backend");
