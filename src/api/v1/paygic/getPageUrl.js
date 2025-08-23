@@ -1,14 +1,12 @@
 const axios = require("axios");
 const User = require("../../../models/User");
+const Paygic = require("../../../models/Paygic");
 
 const getPageUrl = async (req, res, next) => {
   try {
-    const { amount, userId } = req.body;
+    const { amount, userId, subId } = req.body;
 
-    const keys = {
-      mid: "TARASONS",
-      password: "6Qij^91KoLxt",
-    };
+    const keys = await Paygic.findOne();
 
     if (!keys) {
       return res.send({
@@ -17,7 +15,7 @@ const getPageUrl = async (req, res, next) => {
       });
     }
     // Validate input
-    if (!userId || !amount) {
+    if (!userId || !amount || !subId) {
       return res.status(400).json({ error: "Invalid input" });
     }
 
@@ -51,8 +49,8 @@ const getPageUrl = async (req, res, next) => {
         customer_mobile: "4355435545",
         customer_name: user.name,
         customer_email: user.email,
-        redirect_URL: `${process.env.FRONTEND_URL}/payment/success?refId=${receiptId}`,
-        failed_URL: `${process.env.FRONTEND_URL}/payment/failed`,
+        redirect_URL: `${process.env.FRONTEND_URL}/dashboard/success?refId=${receiptId}&subId=${subId}`,
+        failed_URL: `${process.env.FRONTEND_URL}/dashboard/failed`,
       },
       {
         headers: {
