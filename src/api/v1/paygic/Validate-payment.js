@@ -35,16 +35,16 @@ const validatePayment = async (req, res, next) => {
 
     // Check if merchantReferenceId already exists in user's history
     // Check ALL users if this merchantReferenceId exists
-    // const idUsed = await User.findOne({
-    //   "transactionHistory.paygic.merchantReferenceId": merchantReferenceId,
-    // });
+    const idUsed = await User.findOne({
+      "transactionHistory.paygic.merchantReferenceId": merchantReferenceId,
+    });
 
-    // if (idUsed) {
-    //   return res.status(400).send({
-    //     message: "This payment ID has already been processed.",
-    //     success: false,
-    //   });
-    // }
+    if (idUsed) {
+      return res.status(400).send({
+        message: "This payment ID has already been processed.",
+        success: false,
+      });
+    }
 
     // Create merchant token from Paygic
     const { data: tokenData } = await axios.post(
@@ -79,7 +79,6 @@ const validatePayment = async (req, res, next) => {
 
     const mainPlan = planData.plan.find((p) => p.id === subId);
 
-    console.log(mainPlan);
     if (findUser.subscription && findUser.subscription.endDate > now) {
       // User still has active subscription → extend from existing endDate
       startDate = findUser.subscription.startDate;
@@ -124,8 +123,8 @@ const validatePayment = async (req, res, next) => {
             id: findUser.id,
           },
           planId: subId,
-          plan: planData.plan.name,
-          planDuration: planData.plan.duration,
+          plan: mainPlan.name,
+          planDuration: mainPlan.duration,
         },
       ];
     } else {
@@ -141,8 +140,8 @@ const validatePayment = async (req, res, next) => {
             id: findUser.id,
           },
           planId: subId,
-          plan: planData.plan.name,
-          planDuration: planData.plan.duration,
+          plan: mainPlan.name,
+          planDuration: mainPlan.duration,
         },
       ];
     }
