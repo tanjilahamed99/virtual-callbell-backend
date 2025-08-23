@@ -112,8 +112,8 @@ const validatePayment = async (req, res, next) => {
     let updateHistory = [];
 
     const paygic = {
-      merchantReferenceId: paymentStatus.data.merchantReferenceId,
-      paygicReferenceId: paymentStatus.data.paygicReferenceId,
+      merchantReferenceId: paymentStatus?.data?.merchantReferenceId,
+      paygicReferenceId: paymentStatus?.data?.paygicReferenceId,
     };
 
     if (findUser.transactionHistory.length > 0) {
