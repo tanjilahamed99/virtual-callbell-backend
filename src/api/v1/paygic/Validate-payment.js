@@ -79,7 +79,7 @@ const validatePayment = async (req, res, next) => {
 
     const mainPlan = planData.plan.find((p) => p.id === subId);
 
-    if (mainPlan) {
+    if (!mainPlan) {
       return res.status(404).send({
         message: "plan not found",
         success: false,
@@ -132,6 +132,7 @@ const validatePayment = async (req, res, next) => {
           planId: subId,
           plan: mainPlan.name,
           planDuration: mainPlan.duration,
+          planMinute: mainPlan.minute,
         },
       ];
     } else {
@@ -149,6 +150,7 @@ const validatePayment = async (req, res, next) => {
           planId: subId,
           plan: mainPlan.name,
           planDuration: mainPlan.duration,
+          planMinute: mainPlan.minute,
         },
       ];
     }
