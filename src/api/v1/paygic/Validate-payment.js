@@ -132,6 +132,7 @@ const validatePayment = async (req, res, next) => {
           planId: subId,
           plan: mainPlan.name,
           planDuration: mainPlan.duration,
+          planMinute: mainPlan.minute,
         },
       ];
     } else {
@@ -149,6 +150,7 @@ const validatePayment = async (req, res, next) => {
           planId: subId,
           plan: mainPlan.name,
           planDuration: mainPlan.duration,
+          planMinute: mainPlan.minute,
         },
       ];
     }

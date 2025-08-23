@@ -54,6 +54,7 @@ const userSchema = new mongoose.Schema({
       planId: { type: String },
       plan: { type: String, default: "free" },
       planDuration: { type: Number, default: 0 },
+      planMinute: { type: Number, default: 0 },
     },
   ],
   subscription: {
