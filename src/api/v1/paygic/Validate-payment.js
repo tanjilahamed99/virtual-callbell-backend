@@ -79,6 +79,13 @@ const validatePayment = async (req, res, next) => {
 
     const mainPlan = planData.plan.find((p) => p.id === subId);
 
+    if (mainPlan) {
+      return res.status(404).send({
+        message: "plan not found",
+        success: false,
+      });
+    }
+
     if (findUser.subscription && findUser.subscription.endDate > now) {
       // User still has active subscription → extend from existing endDate
       startDate = findUser.subscription.startDate;
@@ -118,7 +125,7 @@ const validatePayment = async (req, res, next) => {
           paymentMethod: "Paygic",
           status: "Completed",
           author: {
-            name: `${findUser.firstName}${" "}${findUser.lastName}`,
+            name: findUser.name,
             email: findUser.email,
             id: findUser.id,
           },
@@ -135,7 +142,7 @@ const validatePayment = async (req, res, next) => {
           paymentMethod: "Paygic",
           status: "Completed",
           author: {
-            name: `${findUser.firstName}${" "}${findUser.lastName}`,
+            name: findUser.name,
             email: findUser.email,
             id: findUser.id,
           },
