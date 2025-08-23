@@ -61,6 +61,10 @@ const userSchema = new mongoose.Schema({
     status: { type: String, default: "active" },
     startDate: { type: Date, default: Date.now },
     endDate: { type: Date },
+    minute: {
+      type: Number,
+      default: 0,
+    },
   },
 });
 

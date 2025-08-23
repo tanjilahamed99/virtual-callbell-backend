@@ -1,15 +1,13 @@
 const axios = require("axios");
 const User = require("../../../models/User");
 const Website = require("../../../models/WebsiteInfo");
+const Paygic = require("../../../models/Paygic");
 
 const validatePayment = async (req, res, next) => {
   try {
     const { merchantReferenceId, userId, subId } = req.body;
     const planData = await Website.findOne();
-    const keys = {
-      mid: "TARASONS",
-      password: "6Qij^91KoLxt",
-    };
+    const keys = await Paygic.findOne();
 
     if (!keys) {
       return res.send({
@@ -79,6 +77,8 @@ const validatePayment = async (req, res, next) => {
     let startDate = now;
     let endDate = new Date();
 
+    const mainPlan = planData.plan.find((p) => p.id === subId);
+
     if (findUser.subscription && findUser.subscription.endDate > now) {
       // User still has active subscription → extend from existing endDate
       startDate = findUser.subscription.startDate;
@@ -94,10 +94,12 @@ const validatePayment = async (req, res, next) => {
 
     // Build subscription object
     let subscription = {
-      plan: "Free",
+      plan: mainPlan.name,
       status: "active",
       startDate,
       endDate,
+      minute:
+        parseFloat(findUser.subscription.minute) + parseInt(mainPlan.minute),
     };
 
     let updateHistory = [];
@@ -121,8 +123,8 @@ const validatePayment = async (req, res, next) => {
             id: findUser.id,
           },
           planId: subId,
-          plan: planData.plan.name,
-          planDuration: planData.plan.duration,
+          plan: mainPlan.name,
+          planDuration: mainPlan.duration,
         },
       ];
     } else {
@@ -138,8 +140,8 @@ const validatePayment = async (req, res, next) => {
             id: findUser.id,
           },
           planId: subId,
-          plan: planData.plan.name,
-          planDuration: planData.plan.duration,
+          plan: mainPlan.name,
+          planDuration: mainPlan.duration,
         },
       ];
     }
