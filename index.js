@@ -58,15 +58,11 @@ io.on("connection", (socket) => {
   });
 
   // When a user ends the call
-  socket.on("end-call", ({ targetSocketId, minutes }) => {
+  socket.on("end-call", ({ targetSocketId }) => {
     // Notify the other peer
-    io.to(targetSocketId).emit("end-call", {
-      minutes,
-    });
+    io.to(targetSocketId).emit("end-call");
     // Also notify the sender (so both clean up at once)
-    io.to(socket.id).emit("end-call", {
-      minutes,
-    });
+    io.to(socket.id).emit("end-call");
   });
 
   // When the caller cancels the call
