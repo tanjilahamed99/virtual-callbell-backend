@@ -2,7 +2,9 @@ const addWebsiteData = require("../../api/v1/admin/addWebisteData");
 const deleteUser = require("../../api/v1/admin/deleteUser");
 const getAllContacts = require("../../api/v1/admin/getAllContacts");
 const getAllUsers = require("../../api/v1/admin/getAllUsers");
+const getLiveKit = require("../../api/v1/admin/getLiveKit");
 const getPaygic = require("../../api/v1/admin/getPaygic");
+const setLiveKit = require("../../api/v1/admin/setLiveKit");
 const setPaygic = require("../../api/v1/admin/setPaygic");
 const checkAdmin = require("../../middlewares/checkAdmin");
 
@@ -20,5 +22,10 @@ router.put("/paygic/set/:id/:email", checkAdmin, setPaygic);
 
 // contact
 router.get("/contacts/:id/:email", checkAdmin, getAllContacts);
+
+
+// livekit
+router.put("/livekit/set/:id/:email", checkAdmin, setLiveKit);
+router.get("/livekit/:id/:email", checkAdmin, getLiveKit);
 
 module.exports = router;

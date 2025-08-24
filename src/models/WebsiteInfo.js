@@ -15,6 +15,7 @@ const WebsiteSchema = new mongoose.Schema({
       price: { type: Number, required: true },
       name: { type: String, required: true },
       minute: { type: Number, required: true },
+      createdAt: { type: Date, default: Date.now }, // Optional: add timestamp
     },
   ],
 });
