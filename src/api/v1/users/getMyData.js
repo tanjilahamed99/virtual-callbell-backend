@@ -20,7 +20,7 @@ const getMyData = async (req, res, next) => {
       data: {
         email: result.email,
         name: result.name,
-        photo: result.photo,
+        image: result.image,
         role: result.role,
         phone: result.phone,
         address: result.address,
