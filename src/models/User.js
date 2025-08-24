@@ -67,6 +67,7 @@ const userSchema = new mongoose.Schema({
       default: 0,
     },
   },
+  createdAt: { type: Date, default: Date.now }, // Optional: add timestamp
 });
 
 userSchema.pre("save", async function (next) {
