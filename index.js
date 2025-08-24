@@ -61,10 +61,10 @@ io.on("connection", (socket) => {
   socket.on("end-call", ({ targetSocketId }) => {
     // Notify the other peer
     io.to(targetSocketId).emit("end-call");
-
     // Also notify the sender (so both clean up at once)
     io.to(socket.id).emit("end-call");
   });
+
 
   // When the caller cancels the call
   socket.on("callCanceled", ({ userId }) => {
@@ -95,7 +95,7 @@ const userRoutes = require("./src/routes/auth/index.js");
 const liveKit = require("./src/routes/liveKit/index.js");
 const users = require("./src/routes/users/index.js");
 const paygic = require("./src/routes/paygic/index.js");
-const admin = require('./src/routes/admin/index.js');
+const admin = require("./src/routes/admin/index.js");
 
 app.use("/v1/api/auth", userRoutes);
 app.use("/v1/api/liveKit", liveKit);
